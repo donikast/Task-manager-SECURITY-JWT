@@ -16,5 +16,4 @@ public class ReportResponseDto {
     private LocalTime workTime;
     private LocalDateTime dateCreated;
     private LocalDateTime dateUpdated;
-    private TaskResponseDto task;
 }
