@@ -5,6 +5,7 @@ import bg.tu_varna.sit.taskmanager16042025.model.dto.request.FilterReportDto;
 import bg.tu_varna.sit.taskmanager16042025.model.dto.request.ReportRequestDto;
 import bg.tu_varna.sit.taskmanager16042025.model.dto.response.ReportResponseDto;
 import bg.tu_varna.sit.taskmanager16042025.model.dto.response.TaskResponseDto;
+import bg.tu_varna.sit.taskmanager16042025.service.ReportService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,26 +18,41 @@ import java.util.List;
 @RestController
 @RequestMapping("/reports")
 public class ReportController {
-    @PostMapping("/task/{id}")
-    public ResponseEntity<ReportResponseDto> create(@PathVariable(name = "id") long taskId, @Valid @RequestBody ReportRequestDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ReportResponseDto());
+
+    private ReportService reportService;
+
+    public ReportController(ReportService reportService) {
+        this.reportService = reportService;
     }
+
+
+    @PostMapping("/task/{id}")
+    public ResponseEntity<ReportResponseDto> create(@PathVariable(name = "id") long taskId,
+                                                    @Valid @RequestBody ReportRequestDto dto) throws ResourceNotFoundException {
+        ReportResponseDto created = reportService.create(taskId, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
     @GetMapping("/task/{id}")
     public ResponseEntity<List<ReportResponseDto>> getAllByTask(@PathVariable(name = "id") long taskId) throws ResourceNotFoundException {
-        throw new ResourceNotFoundException(taskId, TaskResponseDto.class);  //Добавено в лабораторно упражнение 8
-        //return ResponseEntity.ok(new ArrayList<>());
+        List<ReportResponseDto> reports = reportService.getByTaskId(taskId);
+        return ResponseEntity.ok(reports);
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<ReportResponseDto> get(@PathVariable Long id) throws ResourceNotFoundException {
-        throw new ResourceNotFoundException(id, ReportResponseDto.class);  //Добавено в лабораторно упражнение 8
-        //return ResponseEntity.ok(new ReportResponseDto());
+        ReportResponseDto report = reportService.getById(id);
+        return ResponseEntity.ok(report);
     }
-    @GetMapping()
+
+    @GetMapping("/filter/{taskId}")
     public ResponseEntity<List<ReportResponseDto>> getByWorkTimeInDateInterval(
-            @Valid @ModelAttribute FilterReportDto filter //Добавено в лабораторно упражнение 8
+            @PathVariable long taskId,
+            @Valid @RequestBody FilterReportDto filter
     ) throws ResourceNotFoundException {
-        throw new ResourceNotFoundException(0, TaskResponseDto.class);  //Добавено в лабораторно упражнение 8
-        //return ResponseEntity.ok(new ArrayList<>());
+        List<ReportResponseDto> reports = reportService.getByWorkTimeInDateInterval(taskId, filter);
+        return ResponseEntity.ok(reports);
+
     }
 
     @GetMapping("/task/{id}/max-hours-worked")
@@ -44,14 +60,16 @@ public class ReportController {
         throw new ResourceNotFoundException(taskId, TaskResponseDto.class);  //Добавено в лабораторно упражнение 8
         //return ResponseEntity.ok(new ArrayList<>());
     }
+
     @PutMapping("/{id}/update")
     public ResponseEntity<ReportResponseDto> update(@PathVariable Long id, @Valid @RequestBody ReportRequestDto dto) throws ResourceNotFoundException {
-        throw new ResourceNotFoundException(id, ReportResponseDto.class);  //Добавено в лабораторно упражнение 8
-        //return ResponseEntity.ok(new ReportResponseDto());
+        ReportResponseDto updated = reportService.update(id, dto);
+        return ResponseEntity.ok(updated);
     }
+
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<ReportResponseDto> delete(@PathVariable Long id) throws ResourceNotFoundException {
-        throw new ResourceNotFoundException(id, ReportResponseDto.class);  //Добавено в лабораторно упражнение 8
-        //return ResponseEntity.ok(new ReportResponseDto());
+        ReportResponseDto deleted = reportService.delete(id);
+        return ResponseEntity.ok(deleted);
     }
 }
