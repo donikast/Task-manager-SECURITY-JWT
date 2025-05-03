@@ -21,6 +21,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return getErrorDetailResponseEntity(exception, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(TaskApiException.class)
+    public ResponseEntity<Object> handleTaskApiException(TaskApiException exception) {
+        return getErrorDetailResponseEntity(exception, HttpStatus.NOT_FOUND);
+    }
+
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
