@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import bg.tu_varna.sit.taskmanager16042025.security.JWTTokenProvider;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,13 +34,15 @@ public class AuthServiceImpl implements AuthService {
     private UserDetailsService userDetailsService;
     private AuthenticationManager authenticationManager;
     private PasswordEncoder passwordEncoder;
+    private JWTTokenProvider jwtTokenProvider;
 
-    public AuthServiceImpl(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, UserDetailsService userDetailsService, RoleRepository roleRepository, UserRepository userRepository) {
-        this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
-        this.userDetailsService = userDetailsService;
-        this.roleRepository = roleRepository;
+    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, UserDetailsService userDetailsService, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, JWTTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.userDetailsService = userDetailsService;
+        this.authenticationManager = authenticationManager;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -62,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Message login(HttpServletRequest req, LoginDto loginDto) {
+    public String login(LoginDto loginDto) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -71,9 +74,14 @@ public class AuthServiceImpl implements AuthService {
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(authentication);
 
-         HttpSession session = req.getSession(true);
-        session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
-        return new Message("Logged in");
+        //Добавяне
+        String token = jwtTokenProvider.generateToken(authentication);
+        return token;
+
+        //Премахване
+       /* HttpSession session = req.getSession(true);
+         session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
+         return "User logged-in successfully!";*/
     }
 
     @Override

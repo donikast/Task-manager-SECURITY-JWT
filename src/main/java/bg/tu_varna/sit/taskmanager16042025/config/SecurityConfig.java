@@ -1,5 +1,7 @@
 package bg.tu_varna.sit.taskmanager16042025.config;
 
+import bg.tu_varna.sit.taskmanager16042025.security.JwtAuthenticationEntryPoint;
+import bg.tu_varna.sit.taskmanager16042025.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,11 +14,21 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
+
+    private JwtAuthenticationEntryPoint authenticationEntryPoint;
+    private JwtAuthenticationFilter authenticationFilter;
+
+    public SecurityConfig(JwtAuthenticationEntryPoint authenticationEntryPoint, JwtAuthenticationFilter authenticationFilter) {
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.authenticationFilter = authenticationFilter;
+    }
+
 
     @Bean
     public AuthenticationManager authenticationManager(
@@ -39,13 +51,13 @@ public class SecurityConfig {
                                 .requestMatchers("/admin/**")
                                 .hasRole("ADMIN")
                                 .anyRequest()
-                                .authenticated())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.IF_REQUIRED))
-                .logout(logout -> logout
-                        .logoutUrl("api/auth/logout")
-                        .invalidateHttpSession(true));
+                                .authenticated());
+        http.sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.exceptionHandling(exception -> exception.authenticationEntryPoint (authenticationEntryPoint));
+
         return http.build();
     }
 }

@@ -1,6 +1,7 @@
 package bg.tu_varna.sit.taskmanager16042025.controller;
 
 import bg.tu_varna.sit.taskmanager16042025.exception.TaskApiException;
+import bg.tu_varna.sit.taskmanager16042025.model.AuthResponse;
 import bg.tu_varna.sit.taskmanager16042025.model.Message;
 import bg.tu_varna.sit.taskmanager16042025.model.dto.request.LoginDto;
 import bg.tu_varna.sit.taskmanager16042025.model.dto.request.RegisterDto;
@@ -28,10 +29,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Message> login(HttpServletRequest request, @RequestBody LoginDto loginDto) throws TaskApiException {
-        Message message = authService.login(request, loginDto);
-        return ResponseEntity.status(200).body(message);
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginDto loginDto) {
+        String token = authService.login(loginDto);
+        AuthResponse authResponse = new AuthResponse();
+        authResponse.setAccessToken(token);
+        return ResponseEntity.ok(authResponse);
     }
+
 
     @PostMapping("/logout")
     public ResponseEntity<Message> logout(HttpServletRequest request) throws TaskApiException {

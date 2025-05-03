@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface AuthService {
     Message register(RegisterDto registerDto) throws TaskApiException;
-    Message login(HttpServletRequest req, LoginDto loginDto);
+    String login(LoginDto loginDto);
     Message logout(HttpServletRequest req);
 
 }
