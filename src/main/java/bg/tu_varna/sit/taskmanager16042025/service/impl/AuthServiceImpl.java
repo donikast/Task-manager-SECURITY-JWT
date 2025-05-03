@@ -2,20 +2,29 @@ package bg.tu_varna.sit.taskmanager16042025.service.impl;
 
 import bg.tu_varna.sit.taskmanager16042025.exception.TaskApiException;
 import bg.tu_varna.sit.taskmanager16042025.model.Message;
+import bg.tu_varna.sit.taskmanager16042025.model.dto.request.LoginDto;
 import bg.tu_varna.sit.taskmanager16042025.model.dto.request.RegisterDto;
 import bg.tu_varna.sit.taskmanager16042025.model.entity.Role;
 import bg.tu_varna.sit.taskmanager16042025.model.entity.User;
 import bg.tu_varna.sit.taskmanager16042025.repository.RoleRepository;
 import bg.tu_varna.sit.taskmanager16042025.repository.UserRepository;
 import bg.tu_varna.sit.taskmanager16042025.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -51,4 +60,26 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
         return new Message("User registered");
     }
+
+    @Override
+    public Message login(HttpServletRequest req, LoginDto loginDto) {
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginDto.getUserName(), loginDto.getPassword()));
+
+        SecurityContext sc = SecurityContextHolder.getContext();
+        sc.setAuthentication(authentication);
+
+         HttpSession session = req.getSession(true);
+        session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
+        return new Message("Logged in");
+    }
+
+    @Override
+    public Message logout(HttpServletRequest req) {
+        req.getSession().invalidate();
+        return new Message("Logged out");
+    }
+
 }
