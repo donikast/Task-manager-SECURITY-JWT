@@ -52,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
         user.setUserName(registerDto.getUserName());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setEmail(registerDto.getEmail());
-        Role role = roleRepository.findByName("ROLE_USER")
+        Role role = roleRepository.findByName(registerDto.getRole())
                 .orElseThrow(() -> new TaskApiException("Role not found"));
         Set<Role> roles = new HashSet<>();
         roles.add(role);

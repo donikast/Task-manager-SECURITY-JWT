@@ -8,6 +8,8 @@ import bg.tu_varna.sit.taskmanager16042025.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +24,7 @@ public class TaskController {
         this.taskService = taskService;
     }
 
+    @Secured("ROLE_ADMIN")
     @PostMapping()
     public ResponseEntity<TaskResponseDto> create(@Valid @RequestBody TaskRequestDto dto) {
         TaskResponseDto addedTask = taskService.create(dto);
@@ -40,12 +43,14 @@ public class TaskController {
         return ResponseEntity.ok(task);
     }
 
+    @Secured("ROLE_ADMIN")
     @PutMapping("/{id}/update")
     public ResponseEntity<TaskResponseDto> update(@PathVariable Long id,@Valid  @RequestBody TaskRequestDto dto) throws ResourceNotFoundException {
         TaskResponseDto updatedTask = taskService.update(id, dto);
         return ResponseEntity.ok(updatedTask);
     }
 
+    @Secured("ROLE_ADMIN")
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<TaskResponseDto> delete(@Valid @PathVariable Long id) throws ResourceNotFoundException, RelatedEntityException {
          TaskResponseDto deletedTask = taskService.delete(id);
